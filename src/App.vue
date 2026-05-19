@@ -112,13 +112,15 @@ watch(selected, () => {
     prizes[selected] }}.</p>
 
   <h2>A Stranger Example</h2>
-  <p>Let's say there is a... Big Bad. And this Big Bad has {{ gameState.bigBad.boxCount }} weapons in front of him, one
+  <p>Let's say there is a... Big Bad. And this Big Bad has {{ gameState.bigBad.weaponCount }} weapons in front of him,
+    one
     of
     which can deliver a 1 hit KO. The first weapon you choose will do 10 times the amount of damage!</p>
   <div style="display: block; height:50px;margin:5px">
-    <div class="prize" v-for="value in gameState.bigBad.boxCount"
-      @click="gameState.player.picks[1] === -1 ? gameState.player.picks[1] = value - 1 : -1"
-      :style="{ backgroundColor: gameState.player.picks[1] === value - 1 ? 'lightgreen' : 'lightgrey' }">
+    <div class="prize" v-for="value in gameState.bigBad.weaponCount" @click="() => {
+      gameState.player.picks[1] === -1 ? gameState.player.picks[1] = value - 1 : -1
+      gameState.destroy(5)
+    }" :style="{ backgroundColor: gameState.player.picks[1] === value - 1 ? 'lightgreen' : 'lightgrey' }">
       {{ value }}
     </div>
   </div>
@@ -126,7 +128,7 @@ watch(selected, () => {
     twice as much damage."
   </p>
   <div style="display: block; height:50px;margin:5px">
-    <div class="prize" v-for="value in gameState.bigBad.boxCount"
+    <div class="prize" v-for="value in gameState.bigBad.weaponCount"
       @click="gameState.player.picks[2] === -1 ? gameState.player.picks[2] = value - 1 : -1"
       :style="{ backgroundColor: gameState.player.picks[2] === value - 1 ? 'lightblue' : 'lightgrey' }">
       {{ value }}
@@ -136,7 +138,7 @@ watch(selected, () => {
     the OHKO can save you now.
   </p>
   <div style="display: block; height:50px;margin:5px">
-    <div class="prize" v-for="value in gameState.bigBad.boxCount"
+    <div class="prize" v-for="value in gameState.bigBad.weaponCount"
       @click="gameState.player.picks[3] === -1 ? gameState.player.picks[3] = value - 1 : -1"
       :style="{ backgroundColor: gameState.player.picks[3] === value - 1 ? 'lightcyan' : 'lightgrey' }">
       {{ value }}
