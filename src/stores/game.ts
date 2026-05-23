@@ -2,7 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 
 export const useGameStore = defineStore('game', () => {
-  const story = ["","","",""]
+  const story = ["", "", "", ""]
   const player = ref({
     hp: 10,
     picks: {
@@ -37,8 +37,8 @@ export const useGameStore = defineStore('game', () => {
     }
   }
 
-  function notSelected(index:number):boolean{
-    if(
+  function notSelected(index: number): boolean {
+    if (
       player.value.picks[1] === index ||
       player.value.picks[2] === index ||
       player.value.picks[3] === index ||
@@ -68,5 +68,17 @@ export const useGameStore = defineStore('game', () => {
     console.log(bigBad.value.destroyed)
   }
 
-  return { player, bigBad, enchant, enchantOTKO, destroy, notSelected }
+  function attack(value: number) {
+    // prizes.value.map((value, index) => {
+    //     console.log(value, index, selected.value)
+    //     if (value === 'goat' && index !== selected.value && revealed.value.length != 1) {
+    //       revealed.value.push(index)
+    //     }
+    //   })
+
+    //   console.log(revealed.value)
+    player.value.selected = value
+  }
+
+  return { player, bigBad, enchant, enchantOTKO, destroy, notSelected, attack }
 })

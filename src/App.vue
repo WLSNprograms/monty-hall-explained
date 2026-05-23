@@ -14,7 +14,8 @@ const locked = ref(false)
 
 // For the game portion
 const gameState = useGameStore()
-console.log(gameState.player)
+
+const phase = ref<1 | 2 | 3 | 4>(1)
 
 function pickRandomBox() {
   correctBox.value = Math.floor(Math.random() * numberOfBoxes + 1)
@@ -42,10 +43,30 @@ function reveal() {
   console.log(revealed.value)
 }
 
-onMounted(()=>{
+onMounted(() => {
   gameState.enchantOTKO()
   gameState.enchant()
 })
+
+function setBackgroundColor(value: number): string {
+  if (gameState.player.picks[1] === value - 1) {
+    return "pink"
+  }
+
+  if (gameState.player.picks[2] === value - 1) {
+    return "purple"
+  }
+
+  if (gameState.player.picks[3] === value - 1) {
+    return "green"
+  }
+
+  if (gameState.player.picks[4] === value - 1) {
+    return "gold"
+  }
+
+  return "lightgrey"
+}
 
 watch(selected, () => {
   if (!swapping.value && !swapped.value) {
@@ -90,13 +111,9 @@ watch(selected, () => {
     the remaining door contains the remainder of the probability from your initial guess
   </p>
   <div style="display: block; height: 50px; margin: 5px">
-    <div
-      v-bind:key='value'
-      class="prize"
-      v-for="value in numberOfBoxes"
+    <div v-bind:key='value' class="prize" v-for="value in numberOfBoxes"
       @click="selected === -1 ? (selected = value - 1) : -1"
-      :style="{ backgroundColor: selected === value - 1 ? 'lightgreen' : 'lightgrey' }"
-    >
+      :style="{ backgroundColor: selected === value - 1 ? 'lightgreen' : 'lightgrey' }">
       {{ value }}
     </div>
   </div>
@@ -113,31 +130,21 @@ watch(selected, () => {
     goat.
   </p>
   <div style="display: block; height: 50px; margin: 5px">
-    <div
-    v-bind:key='value'
-      class="prize"
-      v-for="value in numberOfBoxes"
-      :style="{ backgroundColor: selected === value - 1 ? 'lightgreen' : 'lightgrey' }"
-    >
+    <div v-bind:key='value' class="prize" v-for="value in numberOfBoxes"
+      :style="{ backgroundColor: selected === value - 1 ? 'lightgreen' : 'lightgrey' }">
       {{ revealed.indexOf(value - 1) >= 0 ? prizes[value - 1] : '' }}
     </div>
   </div>
   <p>Now, the host gives you an offer: Keep your original box, or swap to the remaining one?</p>
   <div style="display: block; height: 50px; margin: 5px">
-    <div
-    v-bind:key='value'
-      class="prize"
-      v-for="value in numberOfBoxes"
-      @click="
-        () => {
-          if (!swapped) {
-            swapping = true
-            selected !== value - 1 && revealed.indexOf(value - 1) < 0 ? (selected = value - 1) : -1
-          }
+    <div v-bind:key='value' class="prize" v-for="value in numberOfBoxes" @click="
+      () => {
+        if (!swapped) {
+          swapping = true
+          selected !== value - 1 && revealed.indexOf(value - 1) < 0 ? (selected = value - 1) : -1
         }
-      "
-      :style="{ backgroundColor: selected === value - 1 ? 'lightgreen' : 'lightgrey' }"
-    >
+      }
+    " :style="{ backgroundColor: selected === value - 1 ? 'lightgreen' : 'lightgrey' }">
       {{ revealed.indexOf(value - 1) >= 0 || locked ? prizes[value - 1] : '' }}
     </div>
   </div>
@@ -148,86 +155,67 @@ watch(selected, () => {
   </p>
 
   <h2>A Stranger Example</h2>
-  <p v-if='false'>
+  <p v-if='phase === 1'>
     Let's say there is a... Big Bad. And this Big Bad has {{ gameState.bigBad.weaponCount }} weapons
     in front of him, one of which can deliver a 1 hit KO. The first weapon you choose will do 10
     times the amount of damage!
   </p>
-  <div style="display: block; height: 50px; margin: 5px" v-if='false'>
-    <div
-    v-bind:key='value'
-      class="prize"
-      v-for="value in gameState.bigBad.weaponCount"
-      @click="
-        () => {
-          gameState.player.picks[1] === -1 ? (gameState.player.picks[1] = value - 1) : -1
-          gameState.destroy(4)
-        }
-      "
-      :style="{
-        backgroundColor: gameState.player.picks[1] === value - 1 ? 'lightgreen' : 'lightgrey',
-      }"
-    >
+  <div style="display: block; height: 50px; margin: 5px" v-if='phase === 1'>
+    <div v-bind:key='value' class="prize" v-for="value in gameState.bigBad.weaponCount" @click="
+      () => {
+        gameState.player.picks[1] === -1 ? (gameState.player.picks[1] = value - 1) : -1
+        gameState.destroy(4)
+        phase = 2
+      }
+    " :style="{
+      backgroundColor: setBackgroundColor(value),
+    }">
     </div>
   </div>
-  <p v-if='false'>
+  <p v-if='phase === 2'>
     The Big Bad then destroys half of the weapons, avoiding the OHKO, leaving you with only weapons
     that can still do twice as much damage."
   </p>
-  <div style="display: block; height: 50px; margin: 5px" v-if='false'>
-    <div
-    v-bind:key='value'
-      class="prize"
-      v-for="value in gameState.bigBad.weaponCount"
-      @click="() => {
-        if(!gameState.bigBad.destroyed.includes(value - 1) && gameState.notSelected(value - 1)){
-          gameState.player.picks[2] === -1 ? (gameState.player.picks[2] = value - 1) : -1;
-          gameState.destroy(2);
-        }
-        }"
-      :style="{
-        backgroundColor: gameState.player.picks[2] === value - 1 ? 'lightblue' : 'lightgrey',
-      }"
-    >
-      {{ gameState.bigBad.destroyed.indexOf(value - 1) >= 0 ? '🔪' : ''  }}
+  <div style="display: block; height: 50px; margin: 5px" v-if='phase === 2'>
+    <div v-bind:key='value' class="prize" v-for="value in gameState.bigBad.weaponCount" @click="() => {
+      if (!gameState.bigBad.destroyed.includes(value - 1) && gameState.notSelected(value - 1)) {
+        gameState.player.picks[2] === -1 ? (gameState.player.picks[2] = value - 1) : -1;
+        gameState.destroy(2);
+        phase = 3
+      }
+    }" :style="{
+      backgroundColor: setBackgroundColor(value),
+    }">
+      {{ gameState.bigBad.destroyed.indexOf(value - 1) >= 0 ? '🔪' : '' }}
     </div>
   </div>
-  <p v-if='false'>
+  <p v-if='phase === 3'>
     Next, they destroy all but 3 weapons, leaving only weapons with just enough strength to do their
     base damage. Only the OHKO can save you now.
   </p>
-  <div style="display: block; height: 50px; margin: 5px" v-if='false'>
-    <div
-    v-bind:key='value'
-      class="prize"
-      v-for="value in gameState.bigBad.weaponCount"
-      @click="() => {
-        if(!gameState.bigBad.destroyed.includes(value - 1) && gameState.notSelected(value - 1)){
-          gameState.player.picks[3] === -1 ? (gameState.player.picks[3] = value - 1) : -1
-        }
-        }"
-      :style="{
-        backgroundColor: gameState.player.picks[3] === value - 1 ? 'lightcyan' : 'lightgrey',
-      }"
-    >
-      {{ gameState.bigBad.destroyed.indexOf(value - 1) >= 0 ? '🔪' : ''  }}
+  <div style="display: block; height: 50px; margin: 5px" v-if='phase === 3'>
+    <div v-bind:key='value' class="prize" v-for="value in gameState.bigBad.weaponCount" @click="() => {
+      if (!gameState.bigBad.destroyed.includes(value - 1) && gameState.notSelected(value - 1)) {
+        gameState.player.picks[3] === -1 ? (gameState.player.picks[3] = value - 1) : -1
+        phase = 4
+      }
+    }" :style="{
+      backgroundColor: setBackgroundColor(value),
+    }">
+      {{ gameState.bigBad.destroyed.indexOf(value - 1) >= 0 ? '🔪' : '' }}
     </div>
   </div>
-  <p v-if='false'>
+  <p v-if='phase === 4'>
     Finally, they destroy all but one weapon and give you a choice. Do you attack with your initial
     weapon, or attack with one of the later weapons to go for the KO?
   </p>
-  <div style="display: block; height: 50px; margin: 5px" v-if='false'>
-    <div
-    v-bind:key='value'
-      class="prize"
-      v-for="value in gameState.player.picks"
-      @click="gameState.player.picks[4] === -1 ? (gameState.player.picks[4] = value - 1) : -1"
-      :style="{
-        backgroundColor: gameState.player.picks[4] === value - 1 ? 'lightsalmon' : 'lightgrey',
-      }"
-    >
-      {{ value + 1 }}
+  <div style="display: block; height: 50px; margin: 5px" v-if='phase === 4'>
+    <div v-bind:key='value' class="prize" v-for="value in gameState.player.picks" @click="() => {
+      gameState.attack(value)
+    }" :style="{
+      backgroundColor: setBackgroundColor(value + 1),
+    }">
+      {{ gameState.bigBad.weapons[gameState.player.selected] }}
     </div>
   </div>
 </template>
