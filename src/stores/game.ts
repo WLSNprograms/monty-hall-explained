@@ -78,6 +78,7 @@ export const useGameStore = defineStore('game', () => {
 
     //   console.log(revealed.value)
     player.value.selected = value
+    console.log(value)
   }
 
   return { player, bigBad, enchant, enchantOTKO, destroy, notSelected, attack }

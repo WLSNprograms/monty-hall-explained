@@ -191,12 +191,17 @@ watch(selected, () => {
   </div>
   <p v-if='phase === 3'>
     Next, they destroy all but 3 weapons, leaving only weapons with just enough strength to do their
-    base damage. Only the OHKO can save you now.
+    base damage.
   </p>
   <div style="display: block; height: 50px; margin: 5px" v-if='phase === 3'>
     <div v-bind:key='value' class="prize" v-for="value in gameState.bigBad.weaponCount" @click="() => {
       if (!gameState.bigBad.destroyed.includes(value - 1) && gameState.notSelected(value - 1)) {
         gameState.player.picks[3] === -1 ? (gameState.player.picks[3] = value - 1) : -1
+        gameState.bigBad.weapons.forEach((v: string, index: number) => {
+          if (!gameState.bigBad.destroyed.includes(index) && gameState.notSelected(index)) {
+            gameState.player.picks[4] = index
+          }
+        })
         phase = 4
       }
     }" :style="{
@@ -206,8 +211,7 @@ watch(selected, () => {
     </div>
   </div>
   <p v-if='phase === 4'>
-    Finally, they destroy all but one weapon and give you a choice. Do you attack with your initial
-    weapon, or attack with one of the later weapons to go for the KO?
+    Finally, they destroy all but one weapon. Which weapon do you attack with?
   </p>
   <div style="display: block; height: 50px; margin: 5px" v-if='phase === 4'>
     <div v-bind:key='value' class="prize" v-for="value in gameState.player.picks" @click="() => {
@@ -215,9 +219,10 @@ watch(selected, () => {
     }" :style="{
       backgroundColor: setBackgroundColor(value + 1),
     }">
-      {{ gameState.bigBad.weapons[gameState.player.selected] }}
+      {{ value }}
     </div>
   </div>
+  <p>You did {{ gameState.bigBad.weapons[gameState.player.selected] }} damage</p>
 </template>
 
 <style scoped>
