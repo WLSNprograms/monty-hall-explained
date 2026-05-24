@@ -81,5 +81,9 @@ export const useGameStore = defineStore('game', () => {
     console.log(value)
   }
 
-  return { player, bigBad, enchant, enchantOTKO, destroy, notSelected, attack }
+  function reset() {
+
+  }
+
+  return { player, bigBad, enchant, enchantOTKO, destroy, notSelected, attack, reset }
 })

@@ -154,7 +154,17 @@ watch(selected, () => {
     {{ prizes[selected] }}.
   </p>
 
-  <h2>A Stranger Example</h2>
+  <h2>Validating</h2>
+  <p>The problem only works when you only have two distinct choices to make: an initial guess, and a guess after all but
+    one have been removed.</p>
+  <div style="display: inline-block; width:100vw;margin: 5px">
+    <div v-bind:key='value' class="prize" v-for="value in 100" @click="selected === -1 ? (selected = value - 1) : -1"
+      :style="{ backgroundColor: selected === value - 1 ? 'lightgreen' : 'lightgrey' }">
+      {{ value }}
+    </div>
+  </div>
+
+  <h2>A Game</h2>
   <p v-if='phase === 1'>
     Let's say there is a... Big Bad. And this Big Bad has {{ gameState.bigBad.weaponCount }} weapons
     in front of him, one of which can deliver a 1 hit KO. The first weapon you choose will do 10
@@ -232,7 +242,7 @@ watch(selected, () => {
   height: 50px;
   width: 50px;
   float: left;
-  margin: 0 10px;
+  margin: 5px;
   justify-content: center;
   align-items: center;
 }
