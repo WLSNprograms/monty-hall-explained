@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onActivated, onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useGameStore } from './stores/game'
 
 const numberOfBoxes = 3
@@ -17,12 +17,12 @@ const gameState = useGameStore()
 
 const phase = ref<1 | 2 | 3 | 4>(1)
 
-function pickRandomBox() {
-  correctBox.value = Math.floor(Math.random() * numberOfBoxes + 1)
+function pickRandomBox(boxCount:number) {
+  correctBox.value = Math.floor(Math.random() * boxCount + 1)
 }
 
-function putPrizes() {
-  for (let i = 0; i < numberOfBoxes; i++) {
+function putPrizes(boxCount:number) {
+  for (let i = 0; i < boxCount; i++) {
     if (correctBox.value === i + 1) {
       prizes.value.push('car')
     } else {
@@ -31,11 +31,11 @@ function putPrizes() {
   }
 }
 
-function reveal() {
+function reveal(revealCount:number) {
   // This needs to pick a random one instead of just going in order
   prizes.value.map((value, index) => {
     console.log(value, index, selected.value)
-    if (value === 'goat' && index !== selected.value && revealed.value.length != 1) {
+    if (value === 'goat' && index !== selected.value && revealed.value.length < revealCount) {
       revealed.value.push(index)
     }
   })
@@ -70,9 +70,9 @@ function setBackgroundColor(value: number): string {
 
 watch(selected, () => {
   if (!swapping.value && !swapped.value) {
-    pickRandomBox()
-    putPrizes()
-    reveal()
+    // pickRandomBox()
+    // putPrizes()
+    // reveal(1)
   }
 
   if (swapping.value) {
@@ -158,11 +158,34 @@ watch(selected, () => {
   <p>The problem only works when you only have two distinct choices to make: an initial guess, and a guess after all but
     one have been removed.</p>
   <div style="display: inline-block; width:100vw;margin: 5px">
-    <div v-bind:key='value' class="prize" v-for="value in 100" @click="selected === -1 ? (selected = value - 1) : -1"
+    <div v-bind:key='value' class="prize" v-for="value in 100" @click="()=> {
+      selected === -1 ? (selected = value - 1) : -1
+      pickRandomBox(100)
+      putPrizes(100)
+      reveal(99)
+      }"
       :style="{ backgroundColor: selected === value - 1 ? 'lightgreen' : 'lightgrey' }">
       {{ value }}
     </div>
   </div>
+  <p>Now, the host reveals all of the boxes but one: Do you switch or stay?</p>
+  <div style="display: inline-block; width:100vw;margin: 5px">
+    <div v-bind:key='value' class="prize" v-for="value in 100" @click="
+      () => {
+        if (!swapped) {
+          swapping = true
+          selected !== value - 1 && revealed.indexOf(value - 1) < 0 ? (selected = value - 1) : -1
+        }
+      }
+    " :style="{ backgroundColor: selected === value - 1 ? 'lightgreen' : 'lightgrey' }">
+      {{ revealed.indexOf(value - 1) >= 0 || locked ? prizes[value - 1] : '' }}
+    </div>
+  </div>
+  <button style="margin: 15px" @click="locked = true">REVEAL PRIZE</button>
+  <p v-if="locked">
+    {{ prizes[selected] === 'goat' ? 'Better luck next time.' : 'Congrats!' }} You won a
+    {{ prizes[selected] }}.
+  </p>
 
   <h2>A Game</h2>
   <p v-if='phase === 1'>
